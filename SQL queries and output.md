@@ -25,7 +25,7 @@ order by victim_count desc
 #### Output
 ![Screen Shot 2024-06-17 at 8 21 27 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/5dfb37aa-0870-49df-bacb-f91c4923a958)
 
--> Most of the victims are males, followed by females. There are also X genders as well, while a small number of 13344 are unknown/unidentified.
+-> Most of the victims are males, followed by females. There are also X genders as well, while a small number of 13344 victims are unknown/unidentified.
 
 # 3. Number of victims by race
 ```
@@ -79,7 +79,7 @@ order by victim_count desc
 #### Output
 ![Screen Shot 2024-06-17 at 8 39 16 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/1dabbad2-950d-463d-bb4c-7b2dadf25f5b)
 
--> Most officers died while responding to disturbance call, attempting other arrests, or handling custody of prisoners. Other activities are present as well and less common.
+-> Most officers were victims while responding to disturbance call, attempting other arrests, or handling custody of prisoners. Other activities are present as well and less common.
 
 # 7. What were the circumstances and justifiable force for killing the criminals during arrest? 
 ```
