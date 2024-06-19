@@ -572,6 +572,6 @@ from officer_to_civilian_ratio_per_county;
 
 -> They have a weak positive relationship
 
-->> In conclusion, the ratio has nothing to do with the processing time of submission and arrest. So it seems it is hard to find out exactly reasons why some counties took longer other than the reasons related to suburban areas explained above.
+->> In conclusion, the ratio has nothing to do with the processing time of submission and arrest. So it seems it is hard to find out exactly reasons why some counties took longer other than the reasons related to suburban areas explained above. There are many other metrics we can investigate, it will be a topic for another day.
 
 
