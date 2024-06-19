@@ -491,7 +491,7 @@ order by counties_count desc
 #### Output
 ![Screen Shot 2024-06-18 at 5 01 23 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/c8813329-98ca-4174-abed-bc737929d908)
 
--> On average, if the area is not suburban, it is likely that the days submitted and arrested took longer than if the area is suburban While this insight helps us discover facts regarding suburban areas, it still has not solved the mystery of why some counties such as Santa Clara took longer to submit and arrest even if the area is suburban. So let's look at other metrics 
+-> On average, if the area is not suburban, it is likely that the days submitted and arrested took longer than if the area is suburban. While this insight helps us discover facts regarding suburban areas, it still has not solved the mystery of why some counties such as Santa Clara took longer to submit and arrest even if the area is suburban. So let's look at other metrics 
 
 ### total officer/total civilian ratio per county and the correlation
 ```
