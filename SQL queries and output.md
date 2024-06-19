@@ -448,9 +448,130 @@ limit 10
 -> Look at the top 10, we can see that most of the offenses were theft offenses and took place in the second half of the year. 
 
 # 23. Why some counties took longer to submit and arrest? Let's find out statistics related to suburban area, total officers, and total civilian by county.
+
+## On average, how many counties took longer than 100 days to submit and longer than 5 days to arrest if the area is suburban or not? 
+### took longer than 100 days to submit
 ```
+with cte as (select a.county_name, a.suburban_area_flag, round(avg(datediff(date(ni.submission_date), date(ni.incident_date))), 2) 
+as avg_days_submitted_since_the_incident, 
+round(avg(datediff(date(ni.submission_date), date(na.arrest_date))), 2) as avg_days_submitted_since_the_arrest, 
+round(avg(datediff(date(na.arrest_date), date(ni.incident_date))), 2) as avg_days_arrested_since_the_incident
+from nibrs_incident ni
+join nibrs_arrestee na on ni.incident_id = na.incident_id
+join agencies a on a.agency_id = ni.agency_id
+group by a.county_name, a.suburban_area_flag
+order by a.county_name)
+select suburban_area_flag, count(suburban_area_flag) as counties_count from cte 
+where avg_days_submitted_since_the_incident > 100 and avg_days_submitted_since_the_arrest > 100 
+group by suburban_area_flag
+order by counties_count desc
+;
 ```
 #### Output
+![Screen Shot 2024-06-18 at 5 00 35 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/bf93d1ad-2223-4132-ab70-e6f5e83a3ecd)
 
+### took longer than 100 days to submit and 5 days to arrest
+```
+with cte as (select a.county_name, a.suburban_area_flag, round(avg(datediff(date(ni.submission_date), date(ni.incident_date))), 2) 
+as avg_days_submitted_since_the_incident, 
+round(avg(datediff(date(ni.submission_date), date(na.arrest_date))), 2) as avg_days_submitted_since_the_arrest, 
+round(avg(datediff(date(na.arrest_date), date(ni.incident_date))), 2) as avg_days_arrested_since_the_incident
+from nibrs_incident ni
+join nibrs_arrestee na on ni.incident_id = na.incident_id
+join agencies a on a.agency_id = ni.agency_id
+group by a.county_name, a.suburban_area_flag
+order by a.county_name)
+select suburban_area_flag, count(suburban_area_flag) as counties_count from cte 
+where avg_days_submitted_since_the_incident > 100 and avg_days_submitted_since_the_arrest > 100 
+and avg_days_arrested_since_the_incident > 5
+group by suburban_area_flag
+order by counties_count desc
+;
+```
+#### Output
+![Screen Shot 2024-06-18 at 5 01 23 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/c8813329-98ca-4174-abed-bc737929d908)
+
+-> On average, if the area is not suburban, it is likely that the days submitted and arrested took longer than if the area is suburban While this insight helps us discover facts regarding suburban areas, it still has not solved the mystery of why some counties such as Santa Clara took longer to submit and arrest even if the area is suburban. So let's look at other metrics 
+
+### total officer/total civilian ratio per county and the correlation
+```
+with cte2 as (with cte1 as (with cte as (select county_name, sum(male_officer) as total_male_officer_count, sum(male_civilian) as total_male_civilian_count, 
+sum(male_total) as total_male_count, sum(female_officer) as total_female_officer_count, sum(female_civilian) as total_female_civilian_count, 
+sum(female_total) as total_female_count
+from agencies
+group by county_name)
+select county_name, total_male_officer_count + total_female_officer_count as total_officer_count, total_male_civilian_count + 
+total_female_civilian_count as total_civilian_count
+from cte
+order by county_name)
+select county_name, round(total_officer_count/total_civilian_count, 2) as officer_to_civilian_ratio from cte1),
+cte3 as (select a.county_name, round(avg(datediff(date(ni.submission_date), date(ni.incident_date))), 2) 
+as avg_days_submitted_since_the_incident, 
+round(avg(datediff(date(ni.submission_date), date(na.arrest_date))), 2) as avg_days_submitted_since_the_arrest, 
+round(avg(datediff(date(na.arrest_date), date(ni.incident_date))), 2) as avg_days_arrested_since_the_incident
+from nibrs_incident ni
+join nibrs_arrestee na on ni.incident_id = na.incident_id
+join agencies a on a.agency_id = ni.agency_id
+group by a.county_name
+order by a.county_name)
+select cte2.county_name, cte2.officer_to_civilian_ratio, cte3.avg_days_submitted_since_the_incident, 
+cte3.avg_days_submitted_since_the_arrest, cte3.avg_days_arrested_since_the_incident from cte2
+join cte3 on cte2.county_name = cte3.county_name
+;
+```
+#### Output
+![Screen Shot 2024-06-18 at 5 02 54 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/a037d627-3a8f-4442-b3b2-794364f1fde7)
+
+
+## correlation
+### officer_to_civilian_ratio and avg_days_submitted_since_the_incident
+```
+select @ax := avg(officer_to_civilian_ratio), 
+       @ay := avg(avg_days_submitted_since_the_incident), 
+       @div := (stddev_samp(officer_to_civilian_ratio) * stddev_samp(avg_days_submitted_since_the_incident))
+from officer_to_civilian_ratio_per_county;
+
+select sum((officer_to_civilian_ratio - @ax) * (avg_days_submitted_since_the_incident - @ay) )/((count(officer_to_civilian_ratio) -1) * @div) 
+as correlation
+from officer_to_civilian_ratio_per_county;
+```
+#### Output
+![Screen Shot 2024-06-18 at 5 03 38 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/2a4c8c53-0805-42f9-b262-3307b86b541b)
+
+-> They have a weak negative relationship
+
+### officer_to_civilian_ratio and avg_days_submitted_since_the_arrest
+```
+select @ax := avg(officer_to_civilian_ratio), 
+       @ay := avg(avg_days_submitted_since_the_arrest), 
+       @div := (stddev_samp(officer_to_civilian_ratio) * stddev_samp(avg_days_submitted_since_the_arrest))
+from officer_to_civilian_ratio_per_county;
+
+select sum((officer_to_civilian_ratio - @ax) * (avg_days_submitted_since_the_arrest - @ay) )/((count(officer_to_civilian_ratio) -1) * @div) 
+as correlation
+from officer_to_civilian_ratio_per_county;
+```
+#### Output
+![Screen Shot 2024-06-18 at 5 04 40 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/ec1c34fc-2d39-415f-bb00-bde5b555ec83)
+
+-> They have a weak negative relationship
+
+### officer_to_civilian_ratio and avg_days_arrested_since_the_incident
+```
+select @ax := avg(officer_to_civilian_ratio), 
+       @ay := avg(avg_days_arrested_since_the_incident), 
+       @div := (stddev_samp(officer_to_civilian_ratio) * stddev_samp(avg_days_arrested_since_the_incident))
+from officer_to_civilian_ratio_per_county;
+
+select sum((officer_to_civilian_ratio - @ax) * (avg_days_arrested_since_the_incident - @ay) )/((count(officer_to_civilian_ratio) -1) * @div) 
+as correlation
+from officer_to_civilian_ratio_per_county;
+```
+#### Output
+![Screen Shot 2024-06-18 at 5 05 21 PM](https://github.com/quocduyenanhnguyen/California-Crime-Data-Analysis/assets/92205707/a542e187-0abe-4a44-bc04-f2db5592347e)
+
+-> They have a weak positive relationship
+
+->> In conclusion, the ratio has nothing to do with the processing time of submission and arrest. So it seems it is hard to find out exactly reasons why some counties took longer other than the reasons related to suburban areas explained above.
 
 
