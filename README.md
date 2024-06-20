@@ -10,4 +10,4 @@
 - Attached to this repos is my SQL queries and explanation of output.
 - Link to Tableau viz part 1: https://public.tableau.com/app/profile/anna.quoc.nguyen/viz/CaliforniaCrime2022part1/Dashboard1
 - Link to Tableau viz part 2: https://public.tableau.com/app/profile/anna.quoc.nguyen/viz/CaliforniaCrime2022Part2/Dashboard1
-- Link to Tableau viz part 3:
+- Link to Tableau viz part 3: https://public.tableau.com/app/profile/anna.quoc.nguyen/viz/CaliforniaCrime2022part3/Dashboard2
